@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Monotask</string>
+    <string name="accessibility_service_description">Monotask uses this service to detect when distraction apps are opened during an active focus session and redirect you back to your focus task.</string>
+</resources>
