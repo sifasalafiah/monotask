@@ -331,6 +331,19 @@ class _TaskCard extends ConsumerWidget {
                   ),
                   InkWell(
                     borderRadius: BorderRadius.circular(8),
+                    onTap: () => _showEditSheet(context, ref, theme, s),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: theme.textSecondary.withValues(alpha: 0.55),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
                     onTap: () => _confirmDelete(context, ref, theme, s),
                     child: Padding(
                       padding: const EdgeInsets.all(4),
@@ -568,6 +581,18 @@ class _TaskCard extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showEditSheet(BuildContext context, WidgetRef ref, AppThemeData theme, AppStrings s) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => _EditTaskSheet(theme: theme, task: task),
     );
   }
 
@@ -970,6 +995,380 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
                           timerMode: _timerMode,
                           targetMinutes: _targetMinutes,
                           estimatedPomodoros: (_targetMinutes / 25).ceil().clamp(1, 10),
+                          soundTrack: _soundTrack,
+                        );
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(s.save),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EditTaskSheet extends ConsumerStatefulWidget {
+  final AppThemeData theme;
+  final TaskModel task;
+  const _EditTaskSheet({required this.theme, required this.task});
+
+  @override
+  ConsumerState<_EditTaskSheet> createState() => _EditTaskSheetState();
+}
+
+class _EditTaskSheetState extends ConsumerState<_EditTaskSheet> {
+  late final TextEditingController _titleController;
+  late final TextEditingController _descController;
+  late TaskPriority _priority;
+  late TaskTimerMode _timerMode;
+  late int _targetMinutes;
+  late String? _soundTrack;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.task.title);
+    _descController = TextEditingController(text: widget.task.description ?? '');
+    _priority = widget.task.priority;
+    _timerMode = widget.task.timerMode;
+    _targetMinutes = widget.task.targetMinutes;
+    _soundTrack = widget.task.soundTrack;
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = ref.watch(stringsProvider);
+    final profile = ref.watch(gamificationProvider);
+    final theme = widget.theme;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              s.editTask,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _titleController,
+              autofocus: true,
+              decoration: InputDecoration(hintText: s.taskTitleHint),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _descController,
+              decoration: InputDecoration(hintText: s.taskDescHint),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 16),
+
+            // Priority
+            Text(s.priority, style: TextStyle(color: theme.textSecondary, fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 8),
+            Row(
+              children: TaskPriority.values.map((p) {
+                final isSelected = _priority == p;
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: GestureDetector(
+                      onTap: () => setState(() => _priority = p),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected ? theme.primary : theme.surfaceLight,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          p == TaskPriority.urgent
+                              ? s.priorityUrgent
+                              : p == TaskPriority.high
+                                  ? s.priorityHigh
+                                  : p == TaskPriority.medium
+                                      ? s.priorityMedium
+                                      : s.priorityLow,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected ? Colors.white : theme.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 18),
+
+            // Timer type
+            Text(s.timerType, style: TextStyle(color: theme.textSecondary, fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 8),
+            Container(
+              height: 42,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: theme.surfaceLight,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _timerMode = TaskTimerMode.countdown),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 160),
+                        decoration: BoxDecoration(
+                          color: _timerMode == TaskTimerMode.countdown ? theme.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          s.timerModeCountdown,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: _timerMode == TaskTimerMode.countdown ? FontWeight.bold : FontWeight.w500,
+                            color: _timerMode == TaskTimerMode.countdown ? Colors.white : theme.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _timerMode = TaskTimerMode.stopwatch),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 160),
+                        decoration: BoxDecoration(
+                          color: _timerMode == TaskTimerMode.stopwatch ? theme.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          s.timerModeStopwatch,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: _timerMode == TaskTimerMode.stopwatch ? FontWeight.bold : FontWeight.w500,
+                            color: _timerMode == TaskTimerMode.stopwatch ? Colors.white : theme.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            if (_timerMode == TaskTimerMode.countdown) ...[
+              Row(
+                children: [15, 25, 45, 60].map((mins) {
+                  final isSelected = _targetMinutes == mins;
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _targetMinutes = mins),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 7),
+                          decoration: BoxDecoration(
+                            color: isSelected ? theme.primary.withValues(alpha: 0.18) : theme.surfaceLight,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isSelected ? theme.primary : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${mins}m',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                              color: isSelected ? theme.primary : theme.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Text(s.countdownDuration, style: TextStyle(color: theme.textSecondary, fontSize: 13)),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.remove_circle_outline),
+                    color: theme.primary,
+                    onPressed: () {
+                      if (_targetMinutes > 5) {
+                        setState(() => _targetMinutes = (_targetMinutes - 5).clamp(5, 180));
+                      }
+                    },
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.hourglass_bottom_rounded, size: 16, color: theme.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$_targetMinutes ${s.minutes}',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: theme.textPrimary),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    color: theme.primary,
+                    onPressed: () {
+                      if (_targetMinutes < 180) {
+                        setState(() => _targetMinutes = (_targetMinutes + 5).clamp(5, 180));
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ] else ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.surfaceLight.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.surfaceLight),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.all_inclusive_rounded, color: theme.primary, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        s.stopwatchDesc,
+                        style: TextStyle(color: theme.textSecondary, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 18),
+
+            // Ambient Sound
+            Text(s.taskSoundTrack, style: TextStyle(color: theme.textSecondary, fontWeight: FontWeight.w600, fontSize: 13)),
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  {'id': null, 'title': s.soundNone, 'icon': Icons.volume_off_rounded},
+                  {'id': 'sound_rain', 'title': s.soundRain, 'icon': Icons.water_drop_rounded},
+                  {'id': 'sound_waves', 'title': s.soundWaves, 'icon': Icons.waves_rounded},
+                  {'id': 'sound_campfire', 'title': s.soundCampfire, 'icon': Icons.local_fire_department_rounded},
+                  {'id': 'sound_white_noise', 'title': s.soundWhiteNoise, 'icon': Icons.air_rounded},
+                  {'id': 'sound_lofi', 'title': s.soundLofi, 'icon': Icons.headphones_rounded},
+                ].map((sound) {
+                  final soundId = sound['id'] as String?;
+                  final isUnlocked = profile.isSoundUnlocked(soundId);
+                  final isSelected = _soundTrack == soundId;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6),
+                    child: GestureDetector(
+                      onTap: () {
+                        if (!isUnlocked) {
+                          AppToast.show(
+                            context,
+                            s.unlockInSanctuaryPrompt,
+                            icon: Icons.lock_rounded,
+                          );
+                          return;
+                        }
+                        setState(() => _soundTrack = soundId);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: isSelected ? theme.primary.withValues(alpha: 0.18) : theme.surfaceLight,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isSelected ? theme.primary : Colors.transparent,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              !isUnlocked ? Icons.lock_rounded : (sound['icon'] as IconData),
+                              size: 14,
+                              color: !isUnlocked
+                                  ? theme.textSecondary.withValues(alpha: 0.45)
+                                  : (isSelected ? theme.primary : theme.textSecondary),
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              sound['title'] as String,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                color: !isUnlocked
+                                    ? theme.textSecondary.withValues(alpha: 0.45)
+                                    : (isSelected ? theme.primary : theme.textPrimary),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: theme.primary),
+                onPressed: () {
+                  final title = _titleController.text.trim();
+                  if (title.isNotEmpty) {
+                    ref.read(taskListProvider.notifier).updateTask(
+                          taskId: widget.task.id,
+                          title: title,
+                          description: _descController.text.trim().isEmpty
+                              ? null
+                              : _descController.text.trim(),
+                          priority: _priority,
+                          timerMode: _timerMode,
+                          targetMinutes: _targetMinutes,
                           soundTrack: _soundTrack,
                         );
                     Navigator.pop(context);

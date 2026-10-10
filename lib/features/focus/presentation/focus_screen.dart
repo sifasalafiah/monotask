@@ -426,6 +426,7 @@ class FocusScreen extends ConsumerWidget {
                             foregroundColor: theme.danger,
                             side: BorderSide(color: theme.danger.withValues(alpha: 0.5)),
                             padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           onPressed: () => _confirmAbandon(context, ref, theme),
                         ),

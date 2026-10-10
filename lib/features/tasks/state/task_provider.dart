@@ -55,6 +55,33 @@ class TaskNotifier extends StateNotifier<List<TaskModel>> {
     await _storage.saveTasks(state);
   }
 
+  Future<void> updateTask({
+    required String taskId,
+    required String title,
+    String? description,
+    required TaskPriority priority,
+    required TaskTimerMode timerMode,
+    required int targetMinutes,
+    String? soundTrack,
+  }) async {
+    state = [
+      for (final task in state)
+        if (task.id == taskId)
+          task.copyWith(
+            title: title,
+            description: description,
+            priority: priority,
+            timerMode: timerMode,
+            targetMinutes: targetMinutes,
+            estimatedPomodoros: (targetMinutes / 25).ceil().clamp(1, 10),
+            soundTrack: soundTrack,
+          )
+        else
+          task,
+    ];
+    await _storage.saveTasks(state);
+  }
+
   Future<void> deleteTask(String taskId) async {
     state = state.where((t) => t.id != taskId).toList();
     await _storage.saveTasks(state);
