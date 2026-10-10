@@ -196,6 +196,16 @@ class EnStrings implements AppStrings {
   String get emergencyExit => 'Emergency Pass';
 
   @override
+  String get emergencyExitConfirmTitle => 'Use Emergency Pass?';
+
+  @override
+  String get emergencyExitConfirmDesc =>
+      'This will end your focus session without any penalty. You have a limited number of passes — use wisely.';
+
+  @override
+  String get emergencyExitConfirm => 'Use Pass';
+
+  @override
   String emergencyPassesLeft(int count) =>
       '$count emergency pass${count == 1 ? '' : 'es'} left';
 

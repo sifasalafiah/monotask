@@ -406,14 +406,7 @@ class FocusScreen extends ConsumerWidget {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            onPressed: () async {
-                              final ok = await focusNotifier.useEmergencyExit();
-                              if (ok && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(s.emergencyPassesLeft(focus.emergencyPassesLeft - 1))),
-                                );
-                              }
-                            },
+                            onPressed: () => _confirmEmergencyExit(context, ref, theme, focus.emergencyPassesLeft),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -468,6 +461,58 @@ class FocusScreen extends ConsumerWidget {
     );
   }
 
+  void _confirmEmergencyExit(BuildContext context, WidgetRef ref, AppThemeData theme, int passesLeft) {
+    final s = ref.watch(stringsProvider);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.surface,
+        title: Row(
+          children: [
+            const Icon(Icons.shield_outlined, color: Colors.amber, size: 22),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                s.emergencyExitConfirmTitle,
+                style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(s.emergencyExitConfirmDesc, style: TextStyle(color: theme.textSecondary)),
+            const SizedBox(height: 12),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(s.cancel, style: TextStyle(color: theme.textSecondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber,
+              foregroundColor: Colors.black,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final ok = await ref.read(focusProvider.notifier).useEmergencyExit();
+              if (ok && context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(s.emergencyPassesLeft(passesLeft - 1))),
+                );
+              }
+            },
+            child: Text(s.emergencyExitConfirm),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _confirmCompleteTask(BuildContext context, WidgetRef ref, AppThemeData theme, TaskModel task) {
     final s = ref.watch(stringsProvider);
     showDialog(
@@ -496,6 +541,8 @@ class FocusScreen extends ConsumerWidget {
               Navigator.pop(ctx);
               await ref.read(taskListProvider.notifier).toggleTaskCompletion(task.id);
               await ref.read(focusProvider.notifier).completeSession();
+              // Auto-unlink task after marking it complete
+              ref.read(focusProvider.notifier).selectTask(null);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

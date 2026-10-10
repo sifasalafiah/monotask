@@ -195,6 +195,16 @@ class IdStrings implements AppStrings {
   String get emergencyExit => 'Tiket Darurat';
 
   @override
+  String get emergencyExitConfirmTitle => 'Gunakan Tiket Darurat?';
+
+  @override
+  String get emergencyExitConfirmDesc =>
+      'Ini akan mengakhiri sesi fokusmu tanpa penalti apapun. Tiket ini terbatas — gunakan dengan bijak.';
+
+  @override
+  String get emergencyExitConfirm => 'Gunakan Tiket';
+
+  @override
   String emergencyPassesLeft(int count) => 'Tersisa $count tiket darurat';
 
   @override

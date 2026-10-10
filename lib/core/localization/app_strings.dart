@@ -70,6 +70,9 @@ abstract class AppStrings {
   String get giveUpWarningDesc;
   String get giveUpConfirm;
   String get emergencyExit;
+  String get emergencyExitConfirmTitle;
+  String get emergencyExitConfirmDesc;
+  String get emergencyExitConfirm;
   String emergencyPassesLeft(int count);
   String get sessionCompletedTitle;
   String sessionCompletedDesc(int minutes, int coins);
