@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/ads/native_ad_widget.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../gamification/state/gamification_provider.dart';
@@ -102,6 +103,9 @@ class AnalyticsScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
+
+                // Native Ad between metrics and chart
+                const NativeAdBannerWidget(),
 
                 // Weekly Trend Bar Chart Container
                 Container(

@@ -119,6 +119,30 @@ class GamificationNotifier extends StateNotifier<UserGamificationProfile> {
     );
     await _storage.saveProfile(state);
   }
+
+  /// Grants an item for free (e.g., via rewarded ad) without deducting coins.
+  Future<void> grantItemFree(ShopCatalogItem item) async {
+    if (state.hasItem(item.id)) return;
+
+    final updatedInventory = [
+      ...state.unlockedInventory,
+      InventoryItemModel(itemId: item.id, itemType: item.type, acquiredAt: DateTime.now()),
+    ];
+
+    state = UserGamificationProfile(
+      coinBalance: state.coinBalance,
+      totalSessionsCompleted: state.totalSessionsCompleted,
+      totalFocusMinutes: state.totalFocusMinutes,
+      currentStreakDays: state.currentStreakDays,
+      lastStreakDate: state.lastStreakDate,
+      petState: state.petState,
+      unlockedInventory: updatedInventory,
+      activeAppTheme: item.type == 'theme'
+          ? item.id.replaceFirst('theme_', '')
+          : state.activeAppTheme,
+    );
+    await _storage.saveProfile(state);
+  }
 }
 
 final gamificationProvider = StateNotifierProvider<GamificationNotifier, UserGamificationProfile>((ref) {

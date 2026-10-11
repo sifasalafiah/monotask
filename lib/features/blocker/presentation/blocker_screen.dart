@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/ads/native_ad_widget.dart';
 import '../../../core/localization/app_strings.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/native/native_blocker_service.dart';
@@ -44,11 +45,21 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
       appBar: AppBar(
         title: Text(s.blockerTitle),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: s.scanApps,
-            onPressed: () => notifier.refreshPermissions(),
-          ),
+          if (blocker.isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              tooltip: s.scanApps,
+              onPressed: () => notifier.refreshPermissions(),
+            ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: s.settingsTitle,
@@ -124,7 +135,10 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            // Native Ad after permissions
+            const NativeAdBannerWidget(),
+            const SizedBox(height: 10),
 
             // System Permissions
             Text(
@@ -161,7 +175,8 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
                 notifier.refreshPermissions();
               },
             ),
-            const SizedBox(height: 24),
+
+            const SizedBox(height: 8),
 
             // Blocked Apps Header & Scan Button
             Row(
@@ -171,15 +186,28 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: theme.textPrimary),
                 ),
                 const Spacer(),
-                TextButton.icon(
-                  icon: const Icon(Icons.sync_rounded, size: 16),
-                  label: Text(s.scanApps),
-                  style: TextButton.styleFrom(
-                    foregroundColor: theme.primary,
-                    visualDensity: VisualDensity.compact,
+                if (blocker.isLoading)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.primary,
+                      ),
+                    ),
+                  )
+                else
+                  TextButton.icon(
+                    icon: const Icon(Icons.sync_rounded, size: 16),
+                    label: Text(s.scanApps),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.primary,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    onPressed: () => notifier.fetchInstalledApps(),
                   ),
-                  onPressed: () => notifier.fetchInstalledApps(),
-                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -198,7 +226,21 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
 
             // App Blacklist Switch List
             if (blocker.isLoading)
-              const Center(child: Padding(padding: EdgeInsets.all(28), child: CircularProgressIndicator()))
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(28),
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(color: theme.primary),
+                      const SizedBox(height: 14),
+                      Text(
+                        s.scanApps,
+                        style: TextStyle(color: theme.textSecondary, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+              )
             else if (filteredApps.isEmpty)
               Container(
                 width: double.infinity,
@@ -222,13 +264,19 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
                     ),
                     const SizedBox(height: 14),
                     OutlinedButton.icon(
-                      icon: const Icon(Icons.sync_rounded, size: 16),
+                      icon: blocker.isLoading
+                          ? SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: theme.primary),
+                            )
+                          : const Icon(Icons.sync_rounded, size: 16),
                       label: Text(s.scanApps),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: theme.primary,
                         side: BorderSide(color: theme.primary),
                       ),
-                      onPressed: () => notifier.fetchInstalledApps(),
+                      onPressed: blocker.isLoading ? null : () => notifier.fetchInstalledApps(),
                     ),
                   ],
                 ),
@@ -270,6 +318,7 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
                   );
                 },
               ),
+            // Native Ad after app list
             const SizedBox(height: 24),
           ],
         ),

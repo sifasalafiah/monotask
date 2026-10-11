@@ -513,4 +513,76 @@ class EnStrings implements AppStrings {
 
   @override
   String get unlockInSanctuaryPrompt => 'Unlock this in the Sanctuary first';
+
+  // Onboarding
+  @override
+  String get onboardingSkip => 'Skip';
+  @override
+  String get onboardingNext => 'Next';
+  @override
+  String get onboardingGetStarted => 'Get Started';
+  @override
+  String get onboarding1Title => 'Stay in the Zone';
+  @override
+  String get onboarding1Subtitle =>
+      'Monotask helps you focus on one task at a time with a built-in Pomodoro timer and smart app blocker.';
+  @override
+  String get onboarding2Title => 'Grow Your Companion';
+  @override
+  String get onboarding2Subtitle =>
+      'Complete focus sessions to level up your pet. Abandon sessions and it gets hurt — stay consistent!';
+  @override
+  String get onboarding3Title => 'Block Distractions';
+  @override
+  String get onboarding3Subtitle =>
+      'Shield yourself from interruptions. Block apps and silence notifications automatically during focus.';
+
+  // IAP / Paywall
+  @override
+  String get proTitle => 'Monotask Pro';
+  @override
+  String get proTagline => 'One-time purchase. Lifetime focus.';
+  @override
+  String get proFeatureNoAds => 'No Ads — Ever';
+  @override
+  String get proFeatureAllUnlocked => 'All Sanctuary Items Unlocked';
+  @override
+  String get proFeatureNoCoins => 'No Coins Required — Everything Free';
+  @override
+  String get proPrice => 'Unlock Pro';
+  @override
+  String get proRestorePurchase => 'Restore Purchase';
+  @override
+  String get proRestoring => 'Restoring...';
+  @override
+  String get proPurchaseSuccess => 'Welcome to Pro! Enjoy your experience.';
+  @override
+  String get proPurchaseFailed => 'Purchase failed. Please try again.';
+  @override
+  String get proAlreadyOwned => 'You already own Pro!';
+  @override
+  String get proLoading => 'Loading...';
+  @override
+  String get proSkip => 'Maybe Later';
+
+  // GDPR / Consent
+  @override
+  String get consentTitle => 'Your Privacy Matters';
+  @override
+  String get consentBody =>
+      'We use personalized ads to keep Monotask free. This requires using your data to show relevant ads. You can change this anytime in Settings.';
+  @override
+  String get consentAccept => 'Accept Personalized Ads';
+  @override
+  String get consentDecline => 'Use Non-Personalized Ads';
+
+  // Ads
+  @override
+  String get adRewarded => 'Watch Ad to Unlock';
+  @override
+  String get adRewardedDesc => 'Watch a short ad to unlock this item for free.';
+  @override
+  String get adWatchToUnlock => 'Watch Ad';
+  @override
+  String get adRewardGranted => 'Item unlocked! Enjoy.';
 }

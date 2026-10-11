@@ -512,4 +512,76 @@ class IdStrings implements AppStrings {
 
   @override
   String get unlockInSanctuaryPrompt => 'Buka kunci item ini di Sanctuary terlebih dahulu';
+
+  // Onboarding
+  @override
+  String get onboardingSkip => 'Lewati';
+  @override
+  String get onboardingNext => 'Lanjut';
+  @override
+  String get onboardingGetStarted => 'Mulai Sekarang';
+  @override
+  String get onboarding1Title => 'Tetap Fokus';
+  @override
+  String get onboarding1Subtitle =>
+      'Monotask membantumu fokus satu tugas dalam satu waktu dengan timer Pomodoro dan pemblokir aplikasi cerdas.';
+  @override
+  String get onboarding2Title => 'Kembangkan Teman Setia';
+  @override
+  String get onboarding2Subtitle =>
+      'Selesaikan sesi fokus untuk menaikkan level petmu. Tinggalkan sesi dan ia akan terluka — tetaplah konsisten!';
+  @override
+  String get onboarding3Title => 'Blokir Gangguan';
+  @override
+  String get onboarding3Subtitle =>
+      'Lindungi diri dari interupsi. Blokir aplikasi dan bisukan notifikasi secara otomatis saat fokus.';
+
+  // IAP / Paywall
+  @override
+  String get proTitle => 'Monotask Pro';
+  @override
+  String get proTagline => 'Sekali beli. Fokus selamanya.';
+  @override
+  String get proFeatureNoAds => 'Tanpa Iklan — Selamanya';
+  @override
+  String get proFeatureAllUnlocked => 'Semua Item Sanctuary Terbuka';
+  @override
+  String get proFeatureNoCoins => 'Tanpa Koin — Semua Gratis';
+  @override
+  String get proPrice => 'Buka Pro';
+  @override
+  String get proRestorePurchase => 'Pulihkan Pembelian';
+  @override
+  String get proRestoring => 'Memulihkan...';
+  @override
+  String get proPurchaseSuccess => 'Selamat datang di Pro! Nikmati pengalamanmu.';
+  @override
+  String get proPurchaseFailed => 'Pembelian gagal. Silakan coba lagi.';
+  @override
+  String get proAlreadyOwned => 'Kamu sudah punya Pro!';
+  @override
+  String get proLoading => 'Memuat...';
+  @override
+  String get proSkip => 'Nanti Saja';
+
+  // GDPR / Consent
+  @override
+  String get consentTitle => 'Privasimu Penting';
+  @override
+  String get consentBody =>
+      'Kami menggunakan iklan personal untuk menjaga Monotask tetap gratis. Ini memerlukan penggunaan datamu untuk menampilkan iklan relevan. Kamu bisa mengubahnya kapan saja di Pengaturan.';
+  @override
+  String get consentAccept => 'Terima Iklan Personal';
+  @override
+  String get consentDecline => 'Gunakan Iklan Non-Personal';
+
+  // Ads
+  @override
+  String get adRewarded => 'Tonton Iklan untuk Buka';
+  @override
+  String get adRewardedDesc => 'Tonton iklan singkat untuk membuka item ini secara gratis.';
+  @override
+  String get adWatchToUnlock => 'Tonton Iklan';
+  @override
+  String get adRewardGranted => 'Item terbuka! Selamat menikmati.';
 }

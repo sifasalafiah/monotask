@@ -180,4 +180,42 @@ abstract class AppStrings {
   String get about;
   String get appVersion;
   String get unlockInSanctuaryPrompt;
+
+  // Onboarding
+  String get onboardingSkip;
+  String get onboardingNext;
+  String get onboardingGetStarted;
+  String get onboarding1Title;
+  String get onboarding1Subtitle;
+  String get onboarding2Title;
+  String get onboarding2Subtitle;
+  String get onboarding3Title;
+  String get onboarding3Subtitle;
+
+  // IAP / Paywall
+  String get proTitle;
+  String get proTagline;
+  String get proFeatureNoAds;
+  String get proFeatureAllUnlocked;
+  String get proFeatureNoCoins;
+  String get proPrice;
+  String get proRestorePurchase;
+  String get proRestoring;
+  String get proPurchaseSuccess;
+  String get proPurchaseFailed;
+  String get proAlreadyOwned;
+  String get proLoading;
+  String get proSkip;
+
+  // GDPR / Consent
+  String get consentTitle;
+  String get consentBody;
+  String get consentAccept;
+  String get consentDecline;
+
+  // Ads
+  String get adRewarded;
+  String get adRewardedDesc;
+  String get adWatchToUnlock;
+  String get adRewardGranted;
 }

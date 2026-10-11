@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/ads/rewarded_ad_service.dart';
 import '../../../core/database/models/gamification_model.dart';
+import '../../../core/iap/iap_service.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../focus/state/focus_provider.dart';
@@ -274,7 +276,9 @@ class _PetSanctuaryScreenState extends ConsumerState<PetSanctuaryScreen> {
 
             // Seamless Inline Catalog List (No nested scroll collision, completely clean)
             ...currentCategoryItems.map((item) {
-              final isOwned = profile.hasItem(item.id) || item.price == 0;
+              final iap = ref.watch(iapProvider);
+              // Pro users own everything
+              final isOwned = iap.isPro || profile.hasItem(item.id) || item.price == 0;
               final isEquipped = (item.type == 'skin' && profile.petState.activeSkinId == item.id) ||
                   (item.type == 'theme' && profile.activeAppTheme == item.id.replaceFirst('theme_', '')) ||
                   (item.type == 'sound' && focus.activeSoundTrack == item.id);
@@ -353,35 +357,7 @@ class _PetSanctuaryScreenState extends ConsumerState<PetSanctuaryScreen> {
                               },
                               child: Text(s.equip, style: const TextStyle(fontSize: 12)),
                             )
-                          : ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.amber.shade700,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              onPressed: () async {
-                                final success = await notifier.purchaseItem(item);
-                                if (success && item.type == 'sound') {
-                                  ref.read(focusProvider.notifier).setAmbientSound(item.id);
-                                }
-                                if (!success && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(s.notEnoughCoins)),
-                                  );
-                                }
-                              },
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.monetization_on_rounded, size: 14, color: Colors.white),
-                                  const SizedBox(width: 4),
-                                  Text('${item.price}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ),
+                          : _BuyTrailing(item: item, theme: theme, s: s),
                 ),
               );
             }),
@@ -428,6 +404,92 @@ class _ShopSegmentItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ),
+    );
+  }
+}
+
+/// Buy trailing widget — coin purchase button + rewarded ad bypass button
+class _BuyTrailing extends ConsumerWidget {
+  final ShopCatalogItem item;
+  final AppThemeData theme;
+  final dynamic s; // AppStrings
+
+  const _BuyTrailing({required this.item, required this.theme, required this.s});
+
+  Future<void> _buyCoin(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(gamificationProvider.notifier);
+    final success = await notifier.purchaseItem(item);
+    if (success && item.type == 'sound') {
+      ref.read(focusProvider.notifier).setAmbientSound(item.id);
+    }
+    if (!success && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(s.notEnoughCoins as String)),
+      );
+    }
+  }
+
+  Future<void> _watchAd(BuildContext context, WidgetRef ref) async {
+    final rewardedNotifier = ref.read(rewardedAdProvider.notifier);
+    await rewardedNotifier.show(
+      onEarnedReward: () async {
+        final gNotifier = ref.read(gamificationProvider.notifier);
+        await gNotifier.grantItemFree(item);
+        if (item.type == 'sound') {
+          ref.read(focusProvider.notifier).setAmbientSound(item.id);
+        }
+        // Show success message after the ad callback
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final adState = ref.watch(rewardedAdProvider);
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Coin purchase button
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.amber.shade700,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          onPressed: () => _buyCoin(context, ref),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.monetization_on_rounded, size: 12, color: Colors.white),
+              const SizedBox(width: 3),
+              Text('${item.price}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        // Watch ad bypass (only when ad is loaded)
+        if (adState.isLoaded) ...[
+          const SizedBox(height: 4),
+          GestureDetector(
+            onTap: () => _watchAd(context, ref),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.play_circle_outline_rounded, size: 11, color: theme.primary),
+                const SizedBox(width: 2),
+                Text(
+                  s.adWatchToUnlock as String,
+                  style: TextStyle(fontSize: 10, color: theme.primary, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

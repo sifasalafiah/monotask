@@ -121,6 +121,14 @@ class LocalStorageService {
   int getEmergencyPassesSetting() => _prefs?.getInt('emergency_pass_count') ?? 1;
   Future<void> setEmergencyPassesSetting(int count) async => await _prefs?.setInt('emergency_pass_count', count);
 
+  // --- ONBOARDING ---
+  bool getOnboardingCompleted() => _prefs?.getBool('onboarding_completed') ?? false;
+  Future<void> setOnboardingCompleted() async => await _prefs?.setBool('onboarding_completed', true);
+
+  // --- PRO STATUS ---
+  bool getIsPro() => _prefs?.getBool('is_pro') ?? false;
+  Future<void> setIsPro(bool value) async => await _prefs?.setBool('is_pro', value);
+
   Future<void> clearAllData() async {
     try {
       await _getFile('monotask_tasks.json').delete();
