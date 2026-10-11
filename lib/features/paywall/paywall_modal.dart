@@ -35,6 +35,13 @@ class PaywallModal extends ConsumerWidget {
     final profile = ref.watch(gamificationProvider);
     final theme = AppThemes.getTheme(profile.activeAppTheme);
 
+    // Auto-dismiss when purchase completes successfully
+    if (iap.isPro && Navigator.of(context).canPop()) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) Navigator.of(context).pop();
+      });
+    }
+
     final features = [
       (Icons.block_rounded, s.proFeatureNoAds),
       (Icons.lock_open_rounded, s.proFeatureAllUnlocked),

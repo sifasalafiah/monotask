@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../core/database/local_storage_service.dart';
+import '../../../core/iap/iap_service.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/services/app_info_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../focus/state/focus_provider.dart';
 import '../../gamification/state/gamification_provider.dart';
+import '../../paywall/paywall_modal.dart';
 import '../../tasks/state/task_provider.dart';
 import '../../../core/widgets/app_toast.dart';
 
@@ -65,6 +67,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(s.settingsTitle),
+        actions: [
+          if (!ref.watch(iapProvider).isPro)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: TextButton.icon(
+                icon: const Icon(Icons.workspace_premium_rounded, size: 16),
+                label: const Text('Pro'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.primary,
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                onPressed: () => showPaywallModal(context),
+              ),
+            ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
