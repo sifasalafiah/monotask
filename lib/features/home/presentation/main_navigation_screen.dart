@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/iap/iap_service.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../analytics/presentation/analytics_screen.dart';
@@ -8,28 +9,39 @@ import '../../focus/presentation/focus_screen.dart';
 import '../../focus/state/focus_provider.dart';
 import '../../gamification/presentation/pet_sanctuary_screen.dart';
 import '../../gamification/state/gamification_provider.dart';
+import '../../paywall/paywall_modal.dart';
 import '../../tasks/presentation/tasks_screen.dart';
 
 class MainNavigationScreen extends ConsumerStatefulWidget {
-  const MainNavigationScreen({super.key});
+  final bool showPaywallOnStart;
+  const MainNavigationScreen({super.key, this.showPaywallOnStart = false});
 
   @override
   ConsumerState<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
-  int _currentIndex = 1; // Default to Focus tab
-
-  // Tracks which tabs have been visited at least once.
-  // A tab is only built when it has been visited — prevents initState
-  // on hidden tabs (e.g. NativeAdBannerWidget won't load until user opens that tab).
+  int _currentIndex = 1;
   late final List<bool> _visited;
 
   @override
   void initState() {
     super.initState();
-    // Pre-mark only the default tab (Focus = index 1) as visited.
     _visited = List.generate(5, (i) => i == 1);
+
+    if (widget.showPaywallOnStart) {
+      // Show paywall after 3s, using addPostFrameCallback so the widget
+      // is fully mounted and context is valid before we navigate.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 3), () {
+          if (!mounted) return;
+          final iap = ref.read(iapProvider);
+          if (!iap.isPro) {
+            showPaywallModal(context);
+          }
+        });
+      });
+    }
   }
 
   @override

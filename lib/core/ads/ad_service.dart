@@ -1,13 +1,13 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/local_storage_service.dart';
 
 // ---------------------------------------------------------------------------
 // Ad Unit IDs
-// Debug builds → Google test ad unit IDs (safe, always show test ads)
+// Debug builds → Google test ad unit IDs
 // Release builds → production IDs
 // ---------------------------------------------------------------------------
 class AdIds {
@@ -46,89 +46,66 @@ class AdIds {
 }
 
 // ---------------------------------------------------------------------------
-// UMP Consent helper
+// AdMob Service — initialization + App Open Ad on resume
 // ---------------------------------------------------------------------------
-
-/// Run UMP consent flow:
-/// 1. requestConsentInfoUpdate
-/// 2. loadAndShowConsentFormIfRequired  (shows native Google consent form if needed)
-/// 3. Returns true when done (whether consent was shown or not)
-///
-/// In debug builds, pass [testDeviceId] (printed to logcat on first run) and
-/// set [forceEea] = true to simulate EU geography on any device.
-Future<void> gatherConsent({
-  String? testDeviceId,
-  bool forceEea = false,
-}) async {
-  final params = kDebugMode
-      ? ConsentRequestParameters(
-          consentDebugSettings: ConsentDebugSettings(
-            testIdentifiers: testDeviceId != null ? [testDeviceId] : [],
-            debugGeography: forceEea
-                ? DebugGeography.debugGeographyEea
-                : DebugGeography.debugGeographyDisabled,
-          ),
-        )
-      : ConsentRequestParameters();
-
-  final completer = _UmpCompleter();
-
-  ConsentInformation.instance.requestConsentInfoUpdate(
-    params,
-    () async {
-      // Consent info updated — show form if required
-      ConsentForm.loadAndShowConsentFormIfRequired((formError) {
-        if (formError != null) {
-          debugPrint('UMP form error: ${formError.message}');
-        }
-        completer.complete();
-      });
-    },
-    (FormError error) {
-      debugPrint('UMP requestConsentInfoUpdate error: ${error.message}');
-      completer.complete(); // Don't block ads on consent error
-    },
-  );
-
-  return completer.future;
-}
-
-/// Minimal completer to bridge callback-style UMP API to Future.
-class _UmpCompleter {
-  final _inner = Completer<void>();
-  bool _completed = false;
-
-  Future<void> get future => _inner.future;
-
-  void complete() {
-    if (!_completed) {
-      _completed = true;
-      _inner.complete();
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// AdMob Service — initialization + App Open Ad
-// ---------------------------------------------------------------------------
-class AdService {
+class AdService with WidgetsBindingObserver {
   final LocalStorageService _storage;
+
   AppOpenAd? _appOpenAd;
   bool _isLoadingAppOpen = false;
   DateTime? _appOpenLoadTime;
+
+  /// Prevents showing App Open Ad on top of another full-screen ad
+  bool _isShowingFullScreenAd = false;
+
+  /// Skip App Open Ad on the very first launch (cold start)
+  bool _isFirstLaunch = true;
 
   AdService(this._storage);
 
   bool get _showAds => !_storage.getIsPro();
 
-  /// Initialize MobileAds SDK after UMP consent has been gathered.
   Future<void> initialize() async {
+    // Update consent info silently on every launch (required by UMP SDK).
+    _updateConsentInfo();
+
     await MobileAds.instance.initialize();
+
+    // Register lifecycle observer so we can show App Open Ad on resume.
+    WidgetsBinding.instance.addObserver(this);
+
     _loadAppOpenAd();
   }
 
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _appOpenAd?.dispose();
+  }
+
+  // ---------------------------------------------------------------------------
+  // App Lifecycle — show App Open Ad when app resumes from background
+  // ---------------------------------------------------------------------------
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      if (_isFirstLaunch) {
+        // Cold start — skip this one, mark as done
+        _isFirstLaunch = false;
+        return;
+      }
+      if (_isShowingFullScreenAd) {
+        // Returning from a rewarded/interstitial — don't stack ads
+        return;
+      }
+      _showAppOpenAdIfAvailable();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // App Open Ad
+  // ---------------------------------------------------------------------------
   void _loadAppOpenAd() {
-    if (!_showAds || _isLoadingAppOpen) return;
+    if (!_showAds || _isLoadingAppOpen || _appOpenAd != null) return;
     _isLoadingAppOpen = true;
 
     AppOpenAd.load(
@@ -139,9 +116,10 @@ class AdService {
           _appOpenAd = ad;
           _appOpenLoadTime = DateTime.now();
           _isLoadingAppOpen = false;
+          debugPrint('AppOpenAd loaded');
         },
         onAdFailedToLoad: (error) {
-          debugPrint('AppOpenAd failed: $error');
+          debugPrint('AppOpenAd failed to load: $error');
           _isLoadingAppOpen = false;
         },
       ),
@@ -150,32 +128,65 @@ class AdService {
 
   bool get _isAppOpenAdAvailable {
     if (_appOpenAd == null || _appOpenLoadTime == null) return false;
+    // Ads expire after 4 hours
     return DateTime.now().difference(_appOpenLoadTime!) < const Duration(hours: 4);
   }
 
-  Future<void> showAppOpenAdIfAvailable() async {
-    if (!_showAds) return;
-    if (!_isAppOpenAdAvailable) {
-      _loadAppOpenAd();
+  void _showAppOpenAdIfAvailable() {
+    if (!_showAds || !_isAppOpenAdAvailable) {
+      _loadAppOpenAd(); // pre-load for next time
       return;
     }
+
     _appOpenAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (_) {
+        _isShowingFullScreenAd = true;
+      },
       onAdDismissedFullScreenContent: (ad) {
+        _isShowingFullScreenAd = false;
         ad.dispose();
         _appOpenAd = null;
         _loadAppOpenAd();
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
+        debugPrint('AppOpenAd failed to show: $error');
+        _isShowingFullScreenAd = false;
         ad.dispose();
         _appOpenAd = null;
         _loadAppOpenAd();
       },
     );
-    await _appOpenAd!.show();
+
+    _appOpenAd!.show();
+  }
+
+  /// Call this before showing a rewarded/interstitial ad to prevent
+  /// App Open Ad from appearing on top of it when the user returns.
+  void setShowingFullScreenAd(bool value) {
+    _isShowingFullScreenAd = value;
+  }
+
+  // ---------------------------------------------------------------------------
+  // UMP Consent info update (silent, every launch)
+  // ---------------------------------------------------------------------------
+  void _updateConsentInfo() {
+    final params = kDebugMode
+        ? ConsentRequestParameters(
+            consentDebugSettings: ConsentDebugSettings(
+              testIdentifiers: const ['7DE9ED6305EE99978DF6F5CAD00ED1C9'],
+              debugGeography: DebugGeography.debugGeographyEea,
+            ),
+          )
+        : ConsentRequestParameters();
+
+    ConsentInformation.instance.requestConsentInfoUpdate(
+      params,
+      () {},
+      (error) => debugPrint('UMP info update error: ${error.message}'),
+    );
   }
 
   bool get shouldShowAds => _showAds;
-
   AdRequest get adRequest => const AdRequest();
 }
 

@@ -584,4 +584,12 @@ class IdStrings implements AppStrings {
   String get adWatchToUnlock => 'Tonton Iklan';
   @override
   String get adRewardGranted => 'Item terbuka! Selamat menikmati.';
+
+  // Privacy / Consent
+  @override
+  String get managePrivacy => 'Kelola Privasi & Persetujuan';
+  @override
+  String get managePrivacyDesc => 'Perbarui preferensi personalisasi iklanmu.';
+  @override
+  String get manageConsent => 'Perbarui Persetujuan';
 }

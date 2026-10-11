@@ -1,12 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../core/database/local_storage_service.dart';
-import '../../core/iap/iap_service.dart';
 import '../../core/localization/locale_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../gamification/state/gamification_provider.dart';
 import '../home/presentation/main_navigation_screen.dart';
-import '../paywall/paywall_modal.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -28,14 +28,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _onFinish() async {
     final storage = ref.read(localStorageServiceProvider);
     await storage.setOnboardingCompleted();
+    if (!mounted) return;
+
+    // Check if UMP consent is required (EU/EEA geography).
+    // canRequestAds() returns false when consent hasn't been obtained yet.
+    final consentRequired = !await ConsentInformation.instance.canRequestAds();
 
     if (!mounted) return;
 
-    // UMP consent is gathered at app launch (main.dart) before ProviderScope.
-    // Go directly to the post-onboarding gate which handles the 3s → paywall flow.
+    if (consentRequired) {
+      // --- Eligible: Onboard → Consent → 3s → Paywall ---
+      // Show Google's native UMP consent form, then proceed.
+      await _showConsentForm();
+    }
+
+    if (!mounted) return;
+    // --- Both paths land here → 3s → Paywall ---
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const _PostOnboardingGate()),
     );
+  }
+
+  Future<void> _showConsentForm() async {
+    final completer = _SimpleCompleter();
+    ConsentForm.loadAndShowConsentFormIfRequired((formError) {
+      if (formError != null) {
+        debugPrint('UMP consent form error: ${formError.message}');
+      }
+      completer.complete();
+    });
+    return completer.future;
   }
 
   void _nextPage() {
@@ -238,23 +260,17 @@ class _PostOnboardingGateState extends ConsumerState<_PostOnboardingGate> {
   }
 
   Future<void> _proceed() async {
-    // Navigate to main app first
     await Future.delayed(const Duration(milliseconds: 100));
     if (!mounted) return;
 
-    // Replace with main app
+    // Pass showPaywallOnStart=true so MainNavigationScreen handles the
+    // 3s delay + paywall from its own mounted context (not from this
+    // widget which gets disposed immediately after pushReplacement).
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      MaterialPageRoute(
+        builder: (_) => const MainNavigationScreen(showPaywallOnStart: true),
+      ),
     );
-
-    // Then show paywall after 3 seconds
-    await Future.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-
-    final iap = ref.read(iapProvider);
-    if (!iap.isPro) {
-      await showPaywallModal(context);
-    }
   }
 
   @override
@@ -267,5 +283,20 @@ class _PostOnboardingGateState extends ConsumerState<_PostOnboardingGate> {
         child: CircularProgressIndicator(color: theme.primary),
       ),
     );
+  }
+}
+
+/// Minimal Completer to bridge UMP callback API to Future.
+class _SimpleCompleter {
+  final _c = Completer<void>();
+  bool _done = false;
+
+  Future<void> get future => _c.future;
+
+  void complete() {
+    if (!_done) {
+      _done = true;
+      _c.complete();
+    }
   }
 }

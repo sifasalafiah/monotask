@@ -585,4 +585,12 @@ class EnStrings implements AppStrings {
   String get adWatchToUnlock => 'Watch Ad';
   @override
   String get adRewardGranted => 'Item unlocked! Enjoy.';
+
+  // Privacy / Consent
+  @override
+  String get managePrivacy => 'Manage Privacy & Consent';
+  @override
+  String get managePrivacyDesc => 'Update your ad personalization preferences.';
+  @override
+  String get manageConsent => 'Update Consent';
 }

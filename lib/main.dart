@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,14 +15,6 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   final storageService = LocalStorageService(prefs);
   await storageService.init();
-
-  // --- UMP Consent (must run before MobileAds.initialize) ---
-  // In debug builds: always simulate EEA geography so consent form always shows.
-  // Replace testDeviceId with the hash printed in logcat on first run.
-  await gatherConsent(
-    forceEea: kDebugMode,
-    testDeviceId: kDebugMode ? '7DE9ED6305EE99978DF6F5CAD00ED1C9' : null,
-  );
 
   runApp(
     ProviderScope(
@@ -47,12 +38,13 @@ class _MonotaskAppState extends ConsumerState<MonotaskApp> {
   @override
   void initState() {
     super.initState();
-    _initAds();
-  }
-
-  Future<void> _initAds() async {
-    final adService = ref.read(adServiceProvider);
-    await adService.initialize();
+    // Initialize AdMob SDK on first frame.
+    // UMP consent is handled inside OnboardingScreen._onFinish() so the
+    // consent form appears after the Flutter UI is already visible.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final adService = ref.read(adServiceProvider);
+      await adService.initialize();
+    });
   }
 
   @override

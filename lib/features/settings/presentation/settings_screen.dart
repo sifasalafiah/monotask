@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../core/database/local_storage_service.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/localization/locale_provider.dart';
@@ -18,6 +19,32 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  bool _isConsentEligible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConsentEligibility();
+  }
+
+  Future<void> _checkConsentEligibility() async {
+    final status = await ConsentInformation.instance.getPrivacyOptionsRequirementStatus();
+    if (mounted) {
+      setState(() {
+        _isConsentEligible =
+            status == PrivacyOptionsRequirementStatus.required;
+      });
+    }
+  }
+
+  Future<void> _showConsentForm() async {
+    await ConsentForm.showPrivacyOptionsForm((error) {
+      if (error != null) debugPrint('Privacy options form error: ${error.message}');
+    });
+    // Re-check after user updates consent
+    _checkConsentEligibility();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
@@ -232,6 +259,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 24),
+
+          // Section: Privacy & Consent (only shown when UMP consent is required)
+          if (_isConsentEligible) ...[
+            _buildSectionHeader(s.managePrivacy, theme),
+            const SizedBox(height: 8),
+            Container(
+              decoration: _cardDecoration(theme),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: Icon(Icons.privacy_tip_outlined, color: theme.primary, size: 22),
+                title: Text(
+                  s.managePrivacy,
+                  style: TextStyle(color: theme.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  s.managePrivacyDesc,
+                  style: TextStyle(color: theme.textSecondary, fontSize: 11),
+                ),
+                trailing: Icon(Icons.chevron_right_rounded, color: theme.textSecondary),
+                onTap: _showConsentForm,
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
 
           // Section: About
           _buildSectionHeader(s.about, theme),

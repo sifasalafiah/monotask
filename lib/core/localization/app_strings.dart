@@ -218,4 +218,9 @@ abstract class AppStrings {
   String get adRewardedDesc;
   String get adWatchToUnlock;
   String get adRewardGranted;
+
+  // Privacy / Consent
+  String get managePrivacy;
+  String get managePrivacyDesc;
+  String get manageConsent;
 }
