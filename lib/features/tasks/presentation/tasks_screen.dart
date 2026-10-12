@@ -681,7 +681,7 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
-        top: 24,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: SingleChildScrollView(
@@ -689,6 +689,17 @@ class _AddTaskSheetState extends ConsumerState<_AddTaskSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 18),
+                decoration: BoxDecoration(
+                  color: theme.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             Text(
               s.addTask,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
@@ -1057,7 +1068,7 @@ class _EditTaskSheetState extends ConsumerState<_EditTaskSheet> {
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
-        top: 24,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: SingleChildScrollView(
@@ -1065,6 +1076,17 @@ class _EditTaskSheetState extends ConsumerState<_EditTaskSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 18),
+                decoration: BoxDecoration(
+                  color: theme.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
             Text(
               s.editTask,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),

@@ -17,7 +17,7 @@ class BlockerScreen extends ConsumerStatefulWidget {
   ConsumerState<BlockerScreen> createState() => _BlockerScreenState();
 }
 
-class _BlockerScreenState extends ConsumerState<BlockerScreen> {
+class _BlockerScreenState extends ConsumerState<BlockerScreen> with WidgetsBindingObserver {
   final _searchController = TextEditingController();
   String _filterQuery = '';
   bool _hasPromptedPermissions = false;
@@ -25,13 +25,25 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkPermissionsOnOpen();
     });
   }
 
-  void _checkPermissionsOnOpen() {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.read(blockerProvider.notifier).refreshPermissions();
+    }
+  }
+
+  Future<void> _checkPermissionsOnOpen() async {
     if (_hasPromptedPermissions || !mounted) return;
+    // Query actual system state first to prevent showing modal if already granted
+    await ref.read(blockerProvider.notifier).refreshPermissions();
+    if (!mounted || _hasPromptedPermissions) return;
+
     final blocker = ref.read(blockerProvider);
     if (!blocker.isAccessibilityGranted || !blocker.isNotificationGranted) {
       _hasPromptedPermissions = true;
@@ -41,6 +53,7 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
   }
@@ -363,6 +376,14 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
       builder: (ctx) {
         return Consumer(
           builder: (context, ref, _) {
+            ref.listen<BlockerState>(blockerProvider, (prev, next) {
+              if (next.isAccessibilityGranted && next.isNotificationGranted) {
+                if (Navigator.of(ctx).canPop()) {
+                  Navigator.of(ctx).pop();
+                }
+              }
+            });
+
             final blocker = ref.watch(blockerProvider);
             final allGranted =
                 blocker.isAccessibilityGranted && blocker.isNotificationGranted;
