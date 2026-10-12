@@ -57,6 +57,7 @@ class AdService with WidgetsBindingObserver {
 
   /// Prevents showing App Open Ad on top of another full-screen ad
   bool _isShowingFullScreenAd = false;
+  DateTime? _lastFullScreenAdDismissedTime;
 
   /// Skip App Open Ad on the very first launch (cold start)
   bool _isFirstLaunch = true;
@@ -95,6 +96,12 @@ class AdService with WidgetsBindingObserver {
       }
       if (_isShowingFullScreenAd) {
         // Returning from a rewarded/interstitial — don't stack ads
+        return;
+      }
+      if (_lastFullScreenAdDismissedTime != null &&
+          DateTime.now().difference(_lastFullScreenAdDismissedTime!) < const Duration(seconds: 4)) {
+        // Just returned from dismissing an in-app ad (rewarded/interstitial)
+        // Suppress App Open ad so it only shows when resuming from another external app
         return;
       }
       _showAppOpenAdIfAvailable();
@@ -144,6 +151,7 @@ class AdService with WidgetsBindingObserver {
       },
       onAdDismissedFullScreenContent: (ad) {
         _isShowingFullScreenAd = false;
+        _lastFullScreenAdDismissedTime = DateTime.now();
         ad.dispose();
         _appOpenAd = null;
         _loadAppOpenAd();
@@ -151,6 +159,7 @@ class AdService with WidgetsBindingObserver {
       onAdFailedToShowFullScreenContent: (ad, error) {
         debugPrint('AppOpenAd failed to show: $error');
         _isShowingFullScreenAd = false;
+        _lastFullScreenAdDismissedTime = DateTime.now();
         ad.dispose();
         _appOpenAd = null;
         _loadAppOpenAd();
@@ -164,6 +173,9 @@ class AdService with WidgetsBindingObserver {
   /// App Open Ad from appearing on top of it when the user returns.
   void setShowingFullScreenAd(bool value) {
     _isShowingFullScreenAd = value;
+    if (!value) {
+      _lastFullScreenAdDismissedTime = DateTime.now();
+    }
   }
 
   // ---------------------------------------------------------------------------

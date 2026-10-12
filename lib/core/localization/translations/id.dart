@@ -53,6 +53,9 @@ class IdStrings implements AppStrings {
   @override
   String get coins => 'Koin';
 
+  @override
+  String get orDivider => 'atau';
+
   // Tasks
   @override
   String get tasksTitle => 'Daftar Tugas';
@@ -584,6 +587,43 @@ class IdStrings implements AppStrings {
   String get adWatchToUnlock => 'Tonton Iklan';
   @override
   String get adRewardGranted => 'Item terbuka! Selamat menikmati.';
+  @override
+  String get adConfirmTitle => 'Tonton Iklan untuk Membuka?';
+  @override
+  String adConfirmDesc(String itemName) =>
+      'Tonton video iklan singkat untuk membuka "$itemName" secara gratis dan langsung menggunakannya tanpa koin.';
+  @override
+  String get adConfirmAction => 'Tonton Sekarang';
+  @override
+  String get adLoadingTitle => 'Memuat Iklan...';
+  @override
+  String get adLoadingDesc =>
+      'Sedang menyiapkan video sponsor untukmu. Mohon tunggu sebentar.';
+  @override
+  String get adUnavailableTitle => 'Iklan Belum Tersedia';
+  @override
+  String get adUnavailableDesc =>
+      'Saat ini iklan video belum tersedia atau gagal dimuat. Silakan coba lagi beberapa saat nanti, atau buka item menggunakan koin.';
+  @override
+  String adRewardUnlockedAndApplied(String itemName) =>
+      '"$itemName" berhasil dibuka dan langsung diterapkan!';
+  @override
+  String get adNotCompleted =>
+      'Tonton video sampai selesai untuk membuka item ini.';
+  @override
+  String unlockItemTitle(String itemName) => 'Buka $itemName';
+  @override
+  String get unlockChooseMethod => 'Pilih cara untuk membuka item ini:';
+  @override
+  String get unlockWithCoins => 'Buka dengan Koin';
+  @override
+  String unlockWithCoinsDesc(int price, int balance) =>
+      'Gunakan $price koin (Saldo kamu: $balance koin)';
+  @override
+  String get unlockWithAd => 'Tonton Iklan (Gratis)';
+  @override
+  String get unlockWithAdDesc =>
+      'Tonton 1 video singkat untuk membuka dan langsung memakai';
 
   // Privacy / Consent
   @override

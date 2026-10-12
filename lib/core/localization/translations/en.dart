@@ -53,6 +53,9 @@ class EnStrings implements AppStrings {
   @override
   String get coins => 'Coins';
 
+  @override
+  String get orDivider => 'or';
+
   // Tasks
   @override
   String get tasksTitle => 'Task Matrix';
@@ -585,6 +588,43 @@ class EnStrings implements AppStrings {
   String get adWatchToUnlock => 'Watch Ad';
   @override
   String get adRewardGranted => 'Item unlocked! Enjoy.';
+  @override
+  String get adConfirmTitle => 'Watch Ad to Unlock?';
+  @override
+  String adConfirmDesc(String itemName) =>
+      'Watch a short video ad to unlock "$itemName" for free and equip it immediately.';
+  @override
+  String get adConfirmAction => 'Watch Now';
+  @override
+  String get adLoadingTitle => 'Loading Ad...';
+  @override
+  String get adLoadingDesc =>
+      'Preparing a sponsored video for you. Please wait a moment.';
+  @override
+  String get adUnavailableTitle => 'Ad Unavailable';
+  @override
+  String get adUnavailableDesc =>
+      'No video ads are currently available. Please try again later or unlock this item using coins.';
+  @override
+  String adRewardUnlockedAndApplied(String itemName) =>
+      '"$itemName" has been unlocked and equipped!';
+  @override
+  String get adNotCompleted =>
+      'Please watch the full ad to unlock this item.';
+  @override
+  String unlockItemTitle(String itemName) => 'Unlock $itemName';
+  @override
+  String get unlockChooseMethod => 'Choose how you would like to unlock this item:';
+  @override
+  String get unlockWithCoins => 'Unlock with Coins';
+  @override
+  String unlockWithCoinsDesc(int price, int balance) =>
+      'Spend $price coins (Balance: $balance coins)';
+  @override
+  String get unlockWithAd => 'Watch Ad (Free)';
+  @override
+  String get unlockWithAdDesc =>
+      'Watch 1 short video to unlock and equip immediately';
 
   // Privacy / Consent
   @override

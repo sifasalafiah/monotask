@@ -129,13 +129,18 @@ class GamificationNotifier extends StateNotifier<UserGamificationProfile> {
       InventoryItemModel(itemId: item.id, itemType: item.type, acquiredAt: DateTime.now()),
     ];
 
+    final pet = state.petState;
+    if (item.type == 'skin') {
+      pet.activeSkinId = item.id;
+    }
+
     state = UserGamificationProfile(
       coinBalance: state.coinBalance,
       totalSessionsCompleted: state.totalSessionsCompleted,
       totalFocusMinutes: state.totalFocusMinutes,
       currentStreakDays: state.currentStreakDays,
       lastStreakDate: state.lastStreakDate,
-      petState: state.petState,
+      petState: pet,
       unlockedInventory: updatedInventory,
       activeAppTheme: item.type == 'theme'
           ? item.id.replaceFirst('theme_', '')

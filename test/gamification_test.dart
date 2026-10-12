@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monotask/core/database/models/task_model.dart';
 import 'package:monotask/core/database/models/gamification_model.dart';
 import 'package:monotask/core/database/models/focus_session_model.dart';
+import 'package:monotask/core/database/local_storage_service.dart';
 import 'package:monotask/features/focus/state/focus_provider.dart';
+import 'package:monotask/features/gamification/state/gamification_provider.dart';
 
 void main() {
   group('Monotask Models & Gamification Logic Tests', () {
@@ -87,6 +89,24 @@ void main() {
         acquiredAt: DateTime.now(),
       ));
       expect(profile.isThemeUnlocked('forest'), isTrue);
+    });
+
+    test('grantItemFree unlocks item and auto-equips skin and theme', () async {
+      final storage = LocalStorageService(null);
+      final notifier = GamificationNotifier(storage);
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      final dragonSkin = ShopCatalog.items.firstWhere((i) => i.id == 'skin_dragon');
+      await notifier.grantItemFree(dragonSkin);
+
+      expect(notifier.state.hasItem('skin_dragon'), isTrue);
+      expect(notifier.state.petState.activeSkinId, equals('skin_dragon'));
+
+      final cyberTheme = ShopCatalog.items.firstWhere((i) => i.id == 'theme_cyberpunk');
+      await notifier.grantItemFree(cyberTheme);
+
+      expect(notifier.state.hasItem('theme_cyberpunk'), isTrue);
+      expect(notifier.state.activeAppTheme, equals('cyberpunk'));
     });
 
     test('FocusSessionModel correctly handles Pomodoro mode', () {

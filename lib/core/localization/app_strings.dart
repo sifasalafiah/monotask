@@ -20,6 +20,7 @@ abstract class AppStrings {
   String get error;
   String get success;
   String get coins;
+  String get orDivider;
 
   // Task Management
   String get tasksTitle;
@@ -218,6 +219,21 @@ abstract class AppStrings {
   String get adRewardedDesc;
   String get adWatchToUnlock;
   String get adRewardGranted;
+  String get adConfirmTitle;
+  String adConfirmDesc(String itemName);
+  String get adConfirmAction;
+  String get adLoadingTitle;
+  String get adLoadingDesc;
+  String get adUnavailableTitle;
+  String get adUnavailableDesc;
+  String adRewardUnlockedAndApplied(String itemName);
+  String get adNotCompleted;
+  String unlockItemTitle(String itemName);
+  String get unlockChooseMethod;
+  String get unlockWithCoins;
+  String unlockWithCoinsDesc(int price, int balance);
+  String get unlockWithAd;
+  String get unlockWithAdDesc;
 
   // Privacy / Consent
   String get managePrivacy;
