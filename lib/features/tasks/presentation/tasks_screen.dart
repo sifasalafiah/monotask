@@ -38,7 +38,7 @@ class TasksScreen extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.monetization_on_rounded, size: 15, color: Colors.amber),
+                const Icon(Icons.stars_rounded, size: 16, color: Colors.amber),
                 const SizedBox(width: 5),
                 Text(
                   '${profile.coinBalance}',

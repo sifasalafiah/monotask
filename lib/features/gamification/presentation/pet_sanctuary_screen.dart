@@ -65,7 +65,7 @@ class _PetSanctuaryScreenState extends ConsumerState<PetSanctuaryScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.monetization_on_rounded, size: 15, color: Colors.amber),
+                const Icon(Icons.stars_rounded, size: 16, color: Colors.amber),
                 const SizedBox(width: 5),
                 Text(
                   '${profile.coinBalance}',
@@ -493,7 +493,7 @@ class _BuyTrailing extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.monetization_on_rounded, size: 12, color: Colors.white),
+                  const Icon(Icons.stars_rounded, size: 12, color: Colors.white),
                   const SizedBox(width: 3),
                   Text(
                     '${item.price}',
@@ -664,7 +664,7 @@ void _showUnlockSheet(BuildContext context, WidgetRef ref, ShopCatalogItem item,
                           color: Colors.amber.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.monetization_on_rounded, color: Colors.amber, size: 20),
+                        child: const Icon(Icons.stars_rounded, color: Colors.amber, size: 24),
                       ),
                       const SizedBox(width: 12),
                       Expanded(

@@ -42,12 +42,6 @@ class PaywallModal extends ConsumerWidget {
       });
     }
 
-    final features = [
-      (Icons.block_rounded, s.proFeatureNoAds),
-      (Icons.lock_open_rounded, s.proFeatureAllUnlocked),
-      (Icons.monetization_on_outlined, s.proFeatureNoCoins),
-    ];
-
     return Scaffold(
       backgroundColor: theme.background,
       body: SafeArea(
@@ -125,7 +119,21 @@ class PaywallModal extends ConsumerWidget {
                     const SizedBox(height: 32),
 
                     // Feature list
-                    ...features.map((f) => _FeatureTile(icon: f.$1, text: f.$2, theme: theme)),
+                    _FeatureTile(
+                      icon: Icons.block_rounded,
+                      text: s.proFeatureNoAds,
+                      theme: theme,
+                    ),
+                    _FeatureTile(
+                      icon: Icons.lock_open_rounded,
+                      text: s.proFeatureAllUnlocked,
+                      theme: theme,
+                    ),
+                    _FeatureTile(
+                      icon: Icons.stars_rounded,
+                      text: s.proFeatureNoCoins,
+                      theme: theme,
+                    ),
 
                     const SizedBox(height: 36),
 

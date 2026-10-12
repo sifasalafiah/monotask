@@ -134,13 +134,15 @@ class EnStrings implements AppStrings {
   String get deleteTaskConfirmTitle => 'Delete Task';
 
   @override
-  String get deleteTaskConfirmDesc => 'Are you sure you want to delete this task? This action cannot be undone.';
+  String get deleteTaskConfirmDesc =>
+      'Are you sure you want to delete this task? This action cannot be undone.';
 
   @override
   String get completeTaskConfirmTitle => 'Complete Task & Focus?';
 
   @override
-  String get completeTaskConfirmDesc => 'This will mark the task complete and successfully conclude your focus session with rewards.';
+  String get completeTaskConfirmDesc =>
+      'This will mark the task complete and successfully conclude your focus session with rewards.';
 
   @override
   String get taskSoundTrack => 'Focus Ambient Sound';
@@ -155,7 +157,8 @@ class EnStrings implements AppStrings {
   String get timerModeCountdown => 'Countdown (Minutes)';
 
   @override
-  String get stopwatchDesc => 'Timer will count up continuously without a fixed time limit.';
+  String get stopwatchDesc =>
+      'Timer will count up continuously without a fixed time limit.';
 
   @override
   String get countdownDuration => 'Target Duration';
@@ -506,7 +509,8 @@ class EnStrings implements AppStrings {
   String get stopwatchDurationLabel => 'Continuous';
 
   @override
-  String emergencyPassCount(int count) => '$count Pass${count == 1 ? '' : 'es'}';
+  String emergencyPassCount(int count) =>
+      '$count Pass${count == 1 ? '' : 'es'}';
 
   @override
   String get about => 'About Monotask';
@@ -521,22 +525,24 @@ class EnStrings implements AppStrings {
   @override
   String get unlockInSanctuaryPrompt => 'Unlock this in the Sanctuary first';
 
-  // Backup & Restore (JSON)
+  // Backup & Restore
   @override
   String get backupAndRestore => 'Backup & Restore Data';
   @override
   String get backupDesc =>
       'Export all your tasks, focus logs, and companion progress to a JSON backup file, or restore from a previously exported file.';
   @override
-  String get exportData => 'Export Data (JSON)';
+  String get exportData => 'Export Data';
   @override
-  String get importData => 'Import Data (JSON)';
+  String get importData => 'Import Data';
   @override
   String get exportSuccess => 'Backup exported successfully!';
   @override
-  String get importSuccess => 'Data restored successfully! All records have been updated.';
+  String get importSuccess =>
+      'Data restored successfully! All records have been updated.';
   @override
-  String get importFailed => 'Failed to import backup file. Invalid or corrupted JSON.';
+  String get importFailed =>
+      'Failed to import backup file. Invalid or corrupted JSON.';
   @override
   String get importConfirmTitle => 'Restore Backup File?';
   @override
@@ -654,12 +660,12 @@ class EnStrings implements AppStrings {
   String adRewardUnlockedAndApplied(String itemName) =>
       '"$itemName" has been unlocked and equipped!';
   @override
-  String get adNotCompleted =>
-      'Please watch the full ad to unlock this item.';
+  String get adNotCompleted => 'Please watch the full ad to unlock this item.';
   @override
   String unlockItemTitle(String itemName) => 'Unlock $itemName';
   @override
-  String get unlockChooseMethod => 'Choose how you would like to unlock this item:';
+  String get unlockChooseMethod =>
+      'Choose how you would like to unlock this item:';
   @override
   String get unlockWithCoins => 'Unlock with Coins';
   @override

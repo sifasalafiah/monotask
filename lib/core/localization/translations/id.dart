@@ -133,13 +133,15 @@ class IdStrings implements AppStrings {
   String get deleteTaskConfirmTitle => 'Hapus Tugas';
 
   @override
-  String get deleteTaskConfirmDesc => 'Apakah kamu yakin ingin menghapus tugas ini? Tindakan ini tidak dapat dibatalkan.';
+  String get deleteTaskConfirmDesc =>
+      'Apakah kamu yakin ingin menghapus tugas ini? Tindakan ini tidak dapat dibatalkan.';
 
   @override
   String get completeTaskConfirmTitle => 'Selesaikan Tugas & Fokus?';
 
   @override
-  String get completeTaskConfirmDesc => 'Tugas ini akan ditandai selesai dan sesi fokus akan diselesaikan dengan hadiah EXP & koin.';
+  String get completeTaskConfirmDesc =>
+      'Tugas ini akan ditandai selesai dan sesi fokus akan diselesaikan dengan hadiah EXP & koin.';
 
   @override
   String get taskSoundTrack => 'Suara Latar Fokus';
@@ -154,7 +156,8 @@ class IdStrings implements AppStrings {
   String get timerModeCountdown => 'Hitung Mundur (Menit)';
 
   @override
-  String get stopwatchDesc => 'Timer akan berjalan menghitung maju tanpa batasan waktu.';
+  String get stopwatchDesc =>
+      'Timer akan berjalan menghitung maju tanpa batasan waktu.';
 
   @override
   String get countdownDuration => 'Target Durasi';
@@ -518,24 +521,27 @@ class IdStrings implements AppStrings {
       'Aplikasi produktivitas gamifikasi offline yang dirancang untuk konsentrasi mendalam, eksekusi tugas, dan perisai distraksi digital.';
 
   @override
-  String get unlockInSanctuaryPrompt => 'Buka kunci item ini di Sanctuary terlebih dahulu';
+  String get unlockInSanctuaryPrompt =>
+      'Buka kunci item ini di Sanctuary terlebih dahulu';
 
-  // Backup & Restore (JSON)
+  // Backup & Restore
   @override
   String get backupAndRestore => 'Cadangkan & Pulihkan Data';
   @override
   String get backupDesc =>
       'Ekspor semua tugas, riwayat fokus, dan progres sanctuary ke file cadangan JSON, atau pulihkan dari file cadangan sebelumnya.';
   @override
-  String get exportData => 'Ekspor Data (JSON)';
+  String get exportData => 'Ekspor Data';
   @override
-  String get importData => 'Impor Data (JSON)';
+  String get importData => 'Impor Data';
   @override
   String get exportSuccess => 'File cadangan berhasil diekspor!';
   @override
-  String get importSuccess => 'Data berhasil dipulihkan! Semua catatan telah diperbarui.';
+  String get importSuccess =>
+      'Data berhasil dipulihkan! Semua catatan telah diperbarui.';
   @override
-  String get importFailed => 'Gagal mengimpor file cadangan. Format JSON tidak valid atau rusak.';
+  String get importFailed =>
+      'Gagal mengimpor file cadangan. Format JSON tidak valid atau rusak.';
   @override
   String get importConfirmTitle => 'Pulihkan File Cadangan?';
   @override
@@ -602,7 +608,8 @@ class IdStrings implements AppStrings {
   @override
   String get proRestoring => 'Memulihkan...';
   @override
-  String get proPurchaseSuccess => 'Selamat datang di Pro! Nikmati pengalamanmu.';
+  String get proPurchaseSuccess =>
+      'Selamat datang di Pro! Nikmati pengalamanmu.';
   @override
   String get proPurchaseFailed => 'Pembelian gagal. Silakan coba lagi.';
   @override
@@ -627,7 +634,8 @@ class IdStrings implements AppStrings {
   @override
   String get adRewarded => 'Tonton Iklan untuk Buka';
   @override
-  String get adRewardedDesc => 'Tonton iklan singkat untuk membuka item ini secara gratis.';
+  String get adRewardedDesc =>
+      'Tonton iklan singkat untuk membuka item ini secara gratis.';
   @override
   String get adWatchToUnlock => 'Tonton Iklan';
   @override

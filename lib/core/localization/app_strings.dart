@@ -183,7 +183,7 @@ abstract class AppStrings {
   String get appAboutDesc;
   String get unlockInSanctuaryPrompt;
 
-  // Backup & Restore (JSON)
+  // Backup & Restore
   String get backupAndRestore;
   String get backupDesc;
   String get exportData;

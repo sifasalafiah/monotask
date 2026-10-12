@@ -17,15 +17,24 @@ void main() {
       expect(en.adConfirmDesc('Dragon').contains('Dragon'), isTrue);
       expect(en.adUnavailableTitle, equals('Ad Unavailable'));
       expect(en.adUnavailableDesc.isNotEmpty, isTrue);
-      expect(en.adRewardUnlockedAndApplied('Dragon'), equals('"Dragon" has been unlocked and equipped!'));
+      expect(
+        en.adRewardUnlockedAndApplied('Dragon'),
+        equals('"Dragon" has been unlocked and equipped!'),
+      );
       expect(en.unlockWithCoins, equals('Unlock with Coins'));
       expect(en.unlockWithAd, equals('Watch Ad (Free)'));
       expect(en.orDivider, equals('or'));
       expect(en.backupAndRestore, equals('Backup & Restore Data'));
-      expect(en.exportData, equals('Export Data (JSON)'));
-      expect(en.importData, equals('Import Data (JSON)'));
-      expect(en.shieldPermissionModalTitle, equals('Enable Shield Permissions'));
-      expect(en.openAccessibilitySettings, equals('Open Accessibility Settings'));
+      expect(en.exportData, equals('Export Data'));
+      expect(en.importData, equals('Import Data'));
+      expect(
+        en.shieldPermissionModalTitle,
+        equals('Enable Shield Permissions'),
+      );
+      expect(
+        en.openAccessibilitySettings,
+        equals('Open Accessibility Settings'),
+      );
       expect(en.appAboutDesc.isNotEmpty, isTrue);
     });
 
@@ -41,15 +50,21 @@ void main() {
       expect(id.adConfirmDesc('Naga').contains('Naga'), isTrue);
       expect(id.adUnavailableTitle, equals('Iklan Belum Tersedia'));
       expect(id.adUnavailableDesc.isNotEmpty, isTrue);
-      expect(id.adRewardUnlockedAndApplied('Naga'), equals('"Naga" berhasil dibuka dan langsung diterapkan!'));
+      expect(
+        id.adRewardUnlockedAndApplied('Naga'),
+        equals('"Naga" berhasil dibuka dan langsung diterapkan!'),
+      );
       expect(id.unlockWithCoins, equals('Buka dengan Koin'));
       expect(id.unlockWithAd, equals('Tonton Iklan (Gratis)'));
       expect(id.orDivider, equals('atau'));
       expect(id.backupAndRestore, equals('Cadangkan & Pulihkan Data'));
-      expect(id.exportData, equals('Ekspor Data (JSON)'));
-      expect(id.importData, equals('Impor Data (JSON)'));
+      expect(id.exportData, equals('Ekspor Data'));
+      expect(id.importData, equals('Impor Data'));
       expect(id.shieldPermissionModalTitle, equals('Aktifkan Izin Shield'));
-      expect(id.openAccessibilitySettings, equals('Buka Pengaturan Aksesibilitas'));
+      expect(
+        id.openAccessibilitySettings,
+        equals('Buka Pengaturan Aksesibilitas'),
+      );
       expect(id.appAboutDesc.isNotEmpty, isTrue);
     });
 
