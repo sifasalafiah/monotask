@@ -99,7 +99,8 @@ class AdService with WidgetsBindingObserver {
         return;
       }
       if (_lastFullScreenAdDismissedTime != null &&
-          DateTime.now().difference(_lastFullScreenAdDismissedTime!) < const Duration(seconds: 4)) {
+          DateTime.now().difference(_lastFullScreenAdDismissedTime!) <
+              const Duration(seconds: 4)) {
         // Just returned from dismissing an in-app ad (rewarded/interstitial)
         // Suppress App Open ad so it only shows when resuming from another external app
         return;
@@ -136,7 +137,8 @@ class AdService with WidgetsBindingObserver {
   bool get _isAppOpenAdAvailable {
     if (_appOpenAd == null || _appOpenLoadTime == null) return false;
     // Ads expire after 4 hours
-    return DateTime.now().difference(_appOpenLoadTime!) < const Duration(hours: 4);
+    return DateTime.now().difference(_appOpenLoadTime!) <
+        const Duration(hours: 4);
   }
 
   void _showAppOpenAdIfAvailable() {
@@ -182,14 +184,7 @@ class AdService with WidgetsBindingObserver {
   // UMP Consent info update (silent, every launch)
   // ---------------------------------------------------------------------------
   void _updateConsentInfo() {
-    final params = kDebugMode
-        ? ConsentRequestParameters(
-            consentDebugSettings: ConsentDebugSettings(
-              testIdentifiers: const ['7DE9ED6305EE99978DF6F5CAD00ED1C9'],
-              debugGeography: DebugGeography.debugGeographyEea,
-            ),
-          )
-        : ConsentRequestParameters();
+    final params = ConsentRequestParameters();
 
     ConsentInformation.instance.requestConsentInfoUpdate(
       params,
