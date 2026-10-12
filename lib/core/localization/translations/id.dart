@@ -514,7 +514,52 @@ class IdStrings implements AppStrings {
   String get appVersion => 'Versi 1.0.0 (Edisi Offline)';
 
   @override
+  String get appAboutDesc =>
+      'Aplikasi produktivitas gamifikasi offline yang dirancang untuk konsentrasi mendalam, eksekusi tugas, dan perisai distraksi digital.';
+
+  @override
   String get unlockInSanctuaryPrompt => 'Buka kunci item ini di Sanctuary terlebih dahulu';
+
+  // Backup & Restore (JSON)
+  @override
+  String get backupAndRestore => 'Cadangkan & Pulihkan Data';
+  @override
+  String get backupDesc =>
+      'Ekspor semua tugas, riwayat fokus, dan progres sanctuary ke file cadangan JSON, atau pulihkan dari file cadangan sebelumnya.';
+  @override
+  String get exportData => 'Ekspor Data (JSON)';
+  @override
+  String get importData => 'Impor Data (JSON)';
+  @override
+  String get exportSuccess => 'File cadangan berhasil diekspor!';
+  @override
+  String get importSuccess => 'Data berhasil dipulihkan! Semua catatan telah diperbarui.';
+  @override
+  String get importFailed => 'Gagal mengimpor file cadangan. Format JSON tidak valid atau rusak.';
+  @override
+  String get importConfirmTitle => 'Pulihkan File Cadangan?';
+  @override
+  String get importConfirmDesc =>
+      'Tindakan ini akan menggantikan daftar tugas, riwayat fokus, dan inventaris saat ini dengan data dari file cadangan.';
+  @override
+  String get pasteJsonOption => 'Tempel Teks JSON Langsung';
+
+  // Shield Permissions Modal
+  @override
+  String get shieldPermissionModalTitle => 'Aktifkan Izin Shield';
+  @override
+  String get shieldPermissionModalDesc =>
+      'Untuk memblokir aplikasi pengganggu dan menyaring notifikasi saat sesi fokus berjalan, silakan aktifkan izin sistem berikut:';
+  @override
+  String get openAccessibilitySettings => 'Buka Pengaturan Aksesibilitas';
+  @override
+  String get openNotificationSettings => 'Buka Pengaturan Notifikasi Shield';
+  @override
+  String get statusActive => 'Aktif';
+  @override
+  String get statusInactive => 'Perlu Tindakan';
+  @override
+  String get later => 'Nanti Saja';
 
   // Onboarding
   @override

@@ -21,6 +21,12 @@ void main() {
       expect(en.unlockWithCoins, equals('Unlock with Coins'));
       expect(en.unlockWithAd, equals('Watch Ad (Free)'));
       expect(en.orDivider, equals('or'));
+      expect(en.backupAndRestore, equals('Backup & Restore Data'));
+      expect(en.exportData, equals('Export Data (JSON)'));
+      expect(en.importData, equals('Import Data (JSON)'));
+      expect(en.shieldPermissionModalTitle, equals('Enable Shield Permissions'));
+      expect(en.openAccessibilitySettings, equals('Open Accessibility Settings'));
+      expect(en.appAboutDesc.isNotEmpty, isTrue);
     });
 
     test('Indonesian translations are complete and valid', () {
@@ -39,6 +45,12 @@ void main() {
       expect(id.unlockWithCoins, equals('Buka dengan Koin'));
       expect(id.unlockWithAd, equals('Tonton Iklan (Gratis)'));
       expect(id.orDivider, equals('atau'));
+      expect(id.backupAndRestore, equals('Cadangkan & Pulihkan Data'));
+      expect(id.exportData, equals('Ekspor Data (JSON)'));
+      expect(id.importData, equals('Impor Data (JSON)'));
+      expect(id.shieldPermissionModalTitle, equals('Aktifkan Izin Shield'));
+      expect(id.openAccessibilitySettings, equals('Buka Pengaturan Aksesibilitas'));
+      expect(id.appAboutDesc.isNotEmpty, isTrue);
     });
 
     test('Registry returns correct translations and default fallback', () {

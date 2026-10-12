@@ -9,6 +9,7 @@ import '../../settings/presentation/settings_screen.dart';
 import '../../tasks/state/task_provider.dart';
 import '../state/focus_provider.dart';
 import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/pro_badge_button.dart';
 
 class FocusScreen extends ConsumerWidget {
   const FocusScreen({super.key});
@@ -48,6 +49,7 @@ class FocusScreen extends ConsumerWidget {
             onPressed: () => _showSoundPicker(context, ref, theme),
           ),
           if (!focus.isRunning) ...[
+            const ProBadgeButton(),
             IconButton(
               icon: const Icon(Icons.settings_outlined),
               tooltip: s.settingsTitle,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ads/native_ad_widget.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/pro_badge_button.dart';
 import '../../gamification/state/gamification_provider.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../state/analytics_provider.dart';
@@ -22,6 +23,7 @@ class AnalyticsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(s.analyticsTitle),
         actions: [
+          const ProBadgeButton(),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: s.settingsTitle,

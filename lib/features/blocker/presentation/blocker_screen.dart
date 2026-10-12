@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../gamification/state/gamification_provider.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../state/blocker_provider.dart';
+import '../../../core/widgets/pro_badge_button.dart';
 
 class BlockerScreen extends ConsumerStatefulWidget {
   const BlockerScreen({super.key});
@@ -19,6 +20,24 @@ class BlockerScreen extends ConsumerStatefulWidget {
 class _BlockerScreenState extends ConsumerState<BlockerScreen> {
   final _searchController = TextEditingController();
   String _filterQuery = '';
+  bool _hasPromptedPermissions = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPermissionsOnOpen();
+    });
+  }
+
+  void _checkPermissionsOnOpen() {
+    if (_hasPromptedPermissions || !mounted) return;
+    final blocker = ref.read(blockerProvider);
+    if (!blocker.isAccessibilityGranted || !blocker.isNotificationGranted) {
+      _hasPromptedPermissions = true;
+      _showPermissionRequiredModal();
+    }
+  }
 
   @override
   void dispose() {
@@ -60,6 +79,7 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
               tooltip: s.scanApps,
               onPressed: () => notifier.refreshPermissions(),
             ),
+          const ProBadgeButton(),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: s.settingsTitle,
@@ -322,6 +342,256 @@ class _BlockerScreenState extends ConsumerState<BlockerScreen> {
             const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showPermissionRequiredModal() {
+    final s = ref.read(stringsProvider);
+    final profile = ref.read(gamificationProvider);
+    final theme = AppThemes.getTheme(profile.activeAppTheme);
+    final native = ref.read(nativeBlockerServiceProvider);
+    final notifier = ref.read(blockerProvider.notifier);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final blocker = ref.watch(blockerProvider);
+            final allGranted =
+                blocker.isAccessibilityGranted && blocker.isNotificationGranted;
+
+            return SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: theme.textSecondary.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.shield_outlined,
+                              color: Colors.orange, size: 28),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                s.shieldPermissionModalTitle,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                allGranted
+                                    ? s.permissionGranted
+                                    : s.permissionRequired,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      allGranted ? Colors.green : Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      s.shieldPermissionModalDesc,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: theme.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Permission 1: Accessibility
+                    _ModalPermissionItem(
+                      icon: Icons.accessibility_new_rounded,
+                      title: s.accessibilityPermission,
+                      description: s.accessibilityDesc,
+                      isGranted: blocker.isAccessibilityGranted,
+                      actionLabel: s.openAccessibilitySettings,
+                      theme: theme,
+                      s: s,
+                      onAction: () async {
+                        await native.openAccessibilitySettings();
+                        await Future.delayed(const Duration(seconds: 1));
+                        notifier.refreshPermissions();
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Permission 2: Notification Shield
+                    _ModalPermissionItem(
+                      icon: Icons.notifications_active_rounded,
+                      title: s.notificationShieldPermission,
+                      description: s.notificationDesc,
+                      isGranted: blocker.isNotificationGranted,
+                      actionLabel: s.openNotificationSettings,
+                      theme: theme,
+                      s: s,
+                      onAction: () async {
+                        await native.openNotificationListenerSettings();
+                        await Future.delayed(const Duration(seconds: 1));
+                        notifier.refreshPermissions();
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text(
+                          allGranted ? s.close : s.later,
+                          style: TextStyle(
+                            color: theme.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ModalPermissionItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+  final bool isGranted;
+  final String actionLabel;
+  final AppThemeData theme;
+  final AppStrings s;
+  final VoidCallback onAction;
+
+  const _ModalPermissionItem({
+    required this.icon,
+    required this.title,
+    required this.description,
+    required this.isGranted,
+    required this.actionLabel,
+    required this.theme,
+    required this.s,
+    required this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.surfaceLight,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isGranted
+              ? Colors.green.withValues(alpha: 0.3)
+              : Colors.orange.withValues(alpha: 0.4),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: isGranted ? Colors.green : Colors.orange),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isGranted
+                      ? Colors.green.withValues(alpha: 0.15)
+                      : Colors.orange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  isGranted ? s.statusActive : s.statusInactive,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isGranted ? Colors.green : Colors.orange,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            description,
+            style: TextStyle(fontSize: 12, color: theme.textSecondary, height: 1.3),
+          ),
+          if (!isGranted) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.settings_suggest_rounded, size: 16),
+                label: Text(actionLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                onPressed: onAction,
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

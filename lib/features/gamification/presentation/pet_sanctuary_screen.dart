@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../focus/state/focus_provider.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../state/gamification_provider.dart';
+import '../../../core/widgets/pro_badge_button.dart';
 
 class PetSanctuaryScreen extends ConsumerStatefulWidget {
   const PetSanctuaryScreen({super.key});
@@ -74,6 +75,7 @@ class _PetSanctuaryScreenState extends ConsumerState<PetSanctuaryScreen> {
             ),
           ),
           const SizedBox(width: 6),
+          const ProBadgeButton(),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: s.settingsTitle,

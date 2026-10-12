@@ -515,7 +515,52 @@ class EnStrings implements AppStrings {
   String get appVersion => 'Version 1.0.0 (Offline Edition)';
 
   @override
+  String get appAboutDesc =>
+      'An offline, gamified focus assistant designed for deep concentration, task execution, and distraction shielding.';
+
+  @override
   String get unlockInSanctuaryPrompt => 'Unlock this in the Sanctuary first';
+
+  // Backup & Restore (JSON)
+  @override
+  String get backupAndRestore => 'Backup & Restore Data';
+  @override
+  String get backupDesc =>
+      'Export all your tasks, focus logs, and companion progress to a JSON backup file, or restore from a previously exported file.';
+  @override
+  String get exportData => 'Export Data (JSON)';
+  @override
+  String get importData => 'Import Data (JSON)';
+  @override
+  String get exportSuccess => 'Backup exported successfully!';
+  @override
+  String get importSuccess => 'Data restored successfully! All records have been updated.';
+  @override
+  String get importFailed => 'Failed to import backup file. Invalid or corrupted JSON.';
+  @override
+  String get importConfirmTitle => 'Restore Backup File?';
+  @override
+  String get importConfirmDesc =>
+      'This will replace your current tasks, focus history, and inventory with the records in the backup file.';
+  @override
+  String get pasteJsonOption => 'Paste JSON Directly';
+
+  // Shield Permissions Modal
+  @override
+  String get shieldPermissionModalTitle => 'Enable Shield Permissions';
+  @override
+  String get shieldPermissionModalDesc =>
+      'To block distracting apps and shield incoming notifications while in focus mode, please enable the required system permissions below:';
+  @override
+  String get openAccessibilitySettings => 'Open Accessibility Settings';
+  @override
+  String get openNotificationSettings => 'Open Notification Shield Settings';
+  @override
+  String get statusActive => 'Active';
+  @override
+  String get statusInactive => 'Action Required';
+  @override
+  String get later => 'Maybe Later';
 
   // Onboarding
   @override

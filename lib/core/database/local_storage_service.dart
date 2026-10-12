@@ -117,9 +117,29 @@ class LocalStorageService {
     } catch (_) {}
   }
 
-  // --- PREFERENCES ---
-  int getEmergencyPassesSetting() => _prefs?.getInt('emergency_pass_count') ?? 1;
-  Future<void> setEmergencyPassesSetting(int count) async => await _prefs?.setInt('emergency_pass_count', count);
+  // --- PREFERENCES & EMERGENCY PASSES (Default 3, reset daily) ---
+  int getDailyEmergencyPasses() {
+    final now = DateTime.now();
+    final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final savedDate = _prefs?.getString('emergency_pass_date');
+    if (savedDate != todayStr) {
+      // New day -> Reset to default 3 passes
+      _prefs?.setString('emergency_pass_date', todayStr);
+      _prefs?.setInt('emergency_pass_daily_remaining', 3);
+      return 3;
+    }
+    return _prefs?.getInt('emergency_pass_daily_remaining') ?? 3;
+  }
+
+  Future<void> useDailyEmergencyPass() async {
+    final current = getDailyEmergencyPasses();
+    if (current > 0) {
+      await _prefs?.setInt('emergency_pass_daily_remaining', current - 1);
+    }
+  }
+
+  int getEmergencyPassesSetting() => getDailyEmergencyPasses();
+  Future<void> setEmergencyPassesSetting(int count) async {}
 
   // --- ONBOARDING ---
   bool getOnboardingCompleted() => _prefs?.getBool('onboarding_completed') ?? false;

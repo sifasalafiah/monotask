@@ -46,6 +46,10 @@ class _NativeAdBannerWidgetState extends ConsumerState<NativeAdBannerWidget> {
     final adService = ref.read(adServiceProvider);
     if (!adService.shouldShowAds) return;
 
+    final profile = ref.read(gamificationProvider);
+    final theme = AppThemes.getTheme(profile.activeAppTheme);
+    final isDark = theme.isDark;
+
     _nativeAd = NativeAd(
       adUnitId: AdIds.native,
       listener: NativeAdListener(
@@ -61,24 +65,25 @@ class _NativeAdBannerWidgetState extends ConsumerState<NativeAdBannerWidget> {
       request: const AdRequest(),
       nativeTemplateStyle: NativeTemplateStyle(
         templateType: widget.templateType,
+        mainBackgroundColor: theme.surface,
         callToActionTextStyle: NativeTemplateTextStyle(
           textColor: Colors.white,
-          backgroundColor: const Color(0xFFFFAC33),
+          backgroundColor: theme.primary,
           style: NativeTemplateFontStyle.bold,
           size: 13.0,
         ),
         primaryTextStyle: NativeTemplateTextStyle(
-          textColor: const Color(0xFF1A1A2E),
+          textColor: isDark ? const Color(0xFFF1F1F5) : const Color(0xFF1A1A2E),
           style: NativeTemplateFontStyle.bold,
           size: 14.0,
         ),
         secondaryTextStyle: NativeTemplateTextStyle(
-          textColor: const Color(0xFF666680),
+          textColor: isDark ? const Color(0xFFB5B7C4) : const Color(0xFF666680),
           style: NativeTemplateFontStyle.normal,
           size: 12.0,
         ),
         tertiaryTextStyle: NativeTemplateTextStyle(
-          textColor: const Color(0xFF999999),
+          textColor: isDark ? const Color(0xFF888B9E) : const Color(0xFF999999),
           style: NativeTemplateFontStyle.normal,
           size: 11.0,
         ),

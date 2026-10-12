@@ -180,7 +180,29 @@ abstract class AppStrings {
   String emergencyPassCount(int count);
   String get about;
   String get appVersion;
+  String get appAboutDesc;
   String get unlockInSanctuaryPrompt;
+
+  // Backup & Restore (JSON)
+  String get backupAndRestore;
+  String get backupDesc;
+  String get exportData;
+  String get importData;
+  String get exportSuccess;
+  String get importSuccess;
+  String get importFailed;
+  String get importConfirmTitle;
+  String get importConfirmDesc;
+  String get pasteJsonOption;
+
+  // Shield Permissions Modal
+  String get shieldPermissionModalTitle;
+  String get shieldPermissionModalDesc;
+  String get openAccessibilitySettings;
+  String get openNotificationSettings;
+  String get statusActive;
+  String get statusInactive;
+  String get later;
 
   // Onboarding
   String get onboardingSkip;

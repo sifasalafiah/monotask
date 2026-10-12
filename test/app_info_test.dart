@@ -12,7 +12,9 @@ void main() {
 
     final version = await container.read(appVersionProvider.future);
     expect(version, isNotEmpty);
-    expect(version.startsWith('v'), isTrue);
+    expect(version.contains('(') && version.endsWith(')'), isTrue);
+    expect(formatAppVersion('0.1.0', '1'), equals('0.1.0(1)'));
+    expect(formatAppVersion('v0.1.0+1'), equals('0.1.0(1)'));
   });
 
   test('appIconProvider handles missing icon gracefully', () async {

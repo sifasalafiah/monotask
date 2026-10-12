@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import '../../../core/database/local_storage_service.dart';
-import '../../../core/iap/iap_service.dart';
 import '../../../core/localization/app_locale.dart';
 import '../../../core/localization/locale_provider.dart';
 import '../../../core/services/app_info_provider.dart';
+import '../../../core/services/data_backup_service.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_toast.dart';
+import '../../../core/widgets/pro_badge_button.dart';
 import '../../focus/state/focus_provider.dart';
 import '../../gamification/state/gamification_provider.dart';
-import '../../paywall/paywall_modal.dart';
 import '../../tasks/state/task_provider.dart';
-import '../../../core/widgets/app_toast.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -53,8 +52,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final currentLocale = ref.watch(localeProvider);
     final profile = ref.watch(gamificationProvider);
     final theme = AppThemes.getTheme(profile.activeAppTheme);
-    final storage = ref.watch(localStorageServiceProvider);
-    final appVersion = ref.watch(appVersionProvider).value ?? 'v0.1.0+1';
+    final appVersion = ref.watch(appVersionProvider).value ?? '0.1.0(1)';
 
     final themeOptions = [
       {'id': 'amber_light', 'name': s.themeAmberLight, 'icon': Icons.light_mode_outlined},
@@ -67,61 +65,56 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(s.settingsTitle),
-        actions: [
-          if (!ref.watch(iapProvider).isPro)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: TextButton.icon(
-                icon: const Icon(Icons.workspace_premium_rounded, size: 16),
-                label: const Text('Pro'),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.primary,
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-                onPressed: () => showPaywallModal(context),
-              ),
-            ),
+        actions: const [
+          ProBadgeButton(),
+          SizedBox(width: 8),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         children: [
-          // Section: Language
+          // Section: Language (Dropdown)
           _buildSectionHeader(s.language, theme),
           const SizedBox(height: 8),
           Container(
-            height: 44,
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: theme.surfaceLight,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: AppLocaleConfig.supportedLanguages.keys.map((code) {
-                final isSelected = currentLocale == code;
-                final name = AppLocaleConfig.languageNames[code] ?? code.toUpperCase();
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => ref.read(localeProvider.notifier).setLocale(code),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 160),
-                      decoration: BoxDecoration(
-                        color: isSelected ? theme.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        name,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected ? Colors.white : theme.textSecondary,
+            decoration: _cardDecoration(theme),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: currentLocale,
+                isExpanded: true,
+                dropdownColor: theme.surface,
+                icon: Icon(Icons.keyboard_arrow_down_rounded, color: theme.textSecondary),
+                items: AppLocaleConfig.supportedLanguages.keys.map((code) {
+                  final name = AppLocaleConfig.languageNames[code] ?? code.toUpperCase();
+                  return DropdownMenuItem<String>(
+                    value: code,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.language_rounded,
+                          size: 18,
+                          color: code == currentLocale ? theme.primary : theme.textSecondary,
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Text(
+                          name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: code == currentLocale ? FontWeight.bold : FontWeight.w500,
+                            color: code == currentLocale ? theme.primary : theme.textPrimary,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                );
-              }).toList(),
+                  );
+                }).toList(),
+                onChanged: (code) {
+                  if (code != null) {
+                    ref.read(localeProvider.notifier).setLocale(code);
+                  }
+                },
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -194,58 +187,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Section: Focus Timer Preferences
-          _buildSectionHeader(s.focusPreferences, theme),
-          const SizedBox(height: 8),
-          Container(
-            decoration: _cardDecoration(theme),
-            child: ListTile(
-              leading: Icon(Icons.shield_outlined, color: theme.primary, size: 22),
-              title: Text(
-                s.emergencyExitCount,
-                style: TextStyle(
-                  color: theme.textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              trailing: DropdownButton<int>(
-                value: storage.getEmergencyPassesSetting(),
-                dropdownColor: theme.surface,
-                underline: const SizedBox(),
-                items: [
-                  DropdownMenuItem(value: 1, child: Text(s.emergencyPassCount(1))),
-                  DropdownMenuItem(value: 2, child: Text(s.emergencyPassCount(2))),
-                  DropdownMenuItem(value: 3, child: Text(s.emergencyPassCount(3))),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() {
-                      storage.setEmergencyPassesSetting(val);
-                    });
-                  }
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Section: Privacy & Data Reset
-          _buildSectionHeader(s.privacyAndData, theme),
+          // Section: Backup & Restore (JSON)
+          _buildSectionHeader(s.backupAndRestore, theme),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(16),
             decoration: _cardDecoration(theme),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.lock_outline_rounded, size: 20, color: theme.primary),
+                    Icon(Icons.cloud_sync_outlined, size: 20, color: theme.primary),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        s.offlineStorageInfo,
+                        s.backupDesc,
                         style: TextStyle(
                           color: theme.textSecondary.withValues(alpha: 0.85),
                           fontSize: 12,
@@ -255,22 +213,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ],
                 ),
-                const Divider(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    icon: Icon(Icons.delete_outline_rounded, size: 18, color: theme.danger),
-                    label: Text(
-                      s.resetData,
-                      style: TextStyle(color: theme.danger, fontWeight: FontWeight.w600, fontSize: 13),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.upload_file_rounded, size: 18),
+                        label: Text(
+                          s.exportData,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: theme.primary,
+                          side: BorderSide(color: theme.primary.withValues(alpha: 0.5)),
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () => _handleExport(context, s),
+                      ),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: theme.danger.withValues(alpha: 0.5)),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.download_rounded, size: 18),
+                        label: Text(
+                          s.importData,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
+                        ),
+                        onPressed: () => _confirmImportBackup(context, s, theme),
+                      ),
                     ),
-                    onPressed: () => _confirmReset(context, s, theme),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -307,36 +287,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: _cardDecoration(theme),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       s.appName,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: theme.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 2),
                     Text(
-                      s.appTagline,
+                      appVersion,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: theme.textSecondary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: theme.textSecondary.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 6),
                 Text(
-                  appVersion,
+                  s.appAboutDesc,
                   style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: theme.textSecondary.withValues(alpha: 0.8),
+                    fontSize: 12,
+                    color: theme.textSecondary,
+                    height: 1.45,
                   ),
                 ),
               ],
@@ -372,18 +353,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _confirmReset(BuildContext context, dynamic s, AppThemeData theme) {
+  Future<void> _handleExport(BuildContext context, dynamic s) async {
+    final success = await ref.read(dataBackupServiceProvider).exportBackup();
+    if (context.mounted && success) {
+      AppToast.show(context, s.exportSuccess, icon: Icons.check_circle_rounded);
+    }
+  }
+
+  void _confirmImportBackup(BuildContext context, dynamic s, AppThemeData theme) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: theme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          s.resetData,
-          style: TextStyle(color: theme.danger, fontWeight: FontWeight.bold),
+          s.importData,
+          style: TextStyle(color: theme.textPrimary, fontWeight: FontWeight.bold),
         ),
         content: Text(
-          s.resetDataConfirm,
-          style: TextStyle(color: theme.textSecondary),
+          s.importConfirmDesc,
+          style: TextStyle(color: theme.textSecondary, fontSize: 13, height: 1.4),
         ),
         actions: [
           TextButton(
@@ -391,17 +380,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Text(s.cancel, style: TextStyle(color: theme.textSecondary)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: theme.danger),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.primary,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
             onPressed: () async {
               Navigator.pop(ctx);
-              await ref.read(localStorageServiceProvider).clearAllData();
-              ref.invalidate(taskListProvider);
-              ref.invalidate(focusProvider);
-              ref.invalidate(gamificationProvider);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(s.dataResetSuccess)),
-                );
+              final success = await ref.read(dataBackupServiceProvider).importBackup();
+              if (success) {
+                ref.invalidate(taskListProvider);
+                ref.invalidate(focusProvider);
+                ref.invalidate(gamificationProvider);
+                if (context.mounted) {
+                  AppToast.show(context, s.importSuccess, icon: Icons.check_circle_rounded);
+                }
+              } else {
+                if (context.mounted) {
+                  AppToast.show(context, s.importFailed, icon: Icons.info_outline_rounded);
+                }
               }
             },
             child: Text(s.confirm),

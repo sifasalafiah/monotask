@@ -92,7 +92,7 @@ class FocusNotifier extends StateNotifier<FocusTimerState> {
   final _uuid = const Uuid();
 
   FocusNotifier(this._ref, this._storage, this._native, this._audio)
-      : super(const FocusTimerState()) {
+      : super(FocusTimerState(emergencyPassesLeft: _storage.getDailyEmergencyPasses())) {
     _initCallbacks();
   }
 
@@ -239,10 +239,13 @@ class FocusNotifier extends StateNotifier<FocusTimerState> {
       await _native.setKeepScreenOn(false);
       await _audio.stop();
 
+      await _storage.useDailyEmergencyPass();
+      final remaining = _storage.getDailyEmergencyPasses();
+
       state = state.copyWith(
         isRunning: false,
         isPaused: false,
-        emergencyPassesLeft: state.emergencyPassesLeft - 1,
+        emergencyPassesLeft: remaining,
       );
       return true;
     }
@@ -269,7 +272,7 @@ class FocusNotifier extends StateNotifier<FocusTimerState> {
       targetDurationSeconds: state.targetSeconds,
       actualDurationSeconds: state.elapsedSeconds,
       status: FocusSessionStatus.abandoned,
-      emergencyPassesUsed: _storage.getEmergencyPassesSetting() - state.emergencyPassesLeft,
+      emergencyPassesUsed: (3 - state.emergencyPassesLeft).clamp(0, 3),
       interruptionCount: state.interruptionCount,
       coinsEarned: 0,
       petExperienceEarned: 0,
